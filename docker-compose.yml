@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres
+    environment:
+        - POSTGRES_PASSWORD=postgres
+    volumes:
+        - postgres_data:/var/lib/postgresql/data/
+  web:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/code/backend
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  frontend:
+    build: ./frontend
+    command: npm start
+    volumes:
+      - ./frontend:/code/frontend
+      - ./frontend/node_modules:/code/frontend/node_modules
+    ports:
+      - 3000:3000
+    depends_on:
+      - web
+    # Hack to get React to work in docker: https://github.com/facebook/create-react-app/issues/8688
+    stdin_open: true
+
+volumes:
+    postgres_data:
